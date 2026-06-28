@@ -145,4 +145,11 @@ function refreshState() {
   });
 }
 
+document.getElementById('testBtn').addEventListener('click', () => {
+  console.log('testBtn clicked');
+  chrome.runtime.sendMessage({ type: 'TEST_NOTIFICATION' }, (response) => {
+    console.log('response:', response, chrome.runtime.lastError);
+  });
+});
+
 refreshState();

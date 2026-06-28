@@ -80,6 +80,7 @@ chrome.runtime.onInstalled.addListener(async () => {
 // ----- Visa notis -----
 
 function showReminderNotification() {
+  chrome.notifications.clear('stretch_notification');
   chrome.notifications.create('stretch_notification', {
     type: 'basic',
     iconUrl: 'icons/icon128.png',
@@ -147,6 +148,11 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
     if (message.type === 'SET_CHARACTER') {
       await chrome.storage.local.set({ character: message.character });
+      sendResponse({ ok: true });
+    }
+
+    if (message.type === 'TEST_NOTIFICATION') {
+      showReminderNotification();
       sendResponse({ ok: true });
     }
 
