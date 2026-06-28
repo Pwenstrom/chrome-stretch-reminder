@@ -46,3 +46,6 @@ MIT License — fritt att använda, modifiera och dela.
 ## Upphovsman
 
 Skapad av **Peter Wenström** ([@Pwenstrom](https://github.com/Pwenstrom)).
+
+## screenshots
+<img width="655" height="1020" alt="image" src="https://github.com/user-attachments/assets/dbdece94-1732-4fab-8a03-ee3541c452da" />
