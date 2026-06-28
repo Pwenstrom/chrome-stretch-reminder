@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+<meta charset="UTF-8">
+<title>Resningspåminnelse</title>
+<style>
+  :root {
+    --ink: #1A1D23;
+    --bg: #F7F7F8;
+    --muted: #5B6470;
+    --accent: #3A6FF5;
+    --border: #E3E5E8;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    width: 320px;
+    background: var(--bg);
+    font-family: -apple-system, "Segoe UI", system-ui, sans-serif;
+  }
+
+  .figure-zone {
+    background: linear-gradient(180deg, #FFE9D6 0%, #FFF6EC 100%);
+    padding: 18px 0 12px;
+    display: flex;
+    justify-content: center;
+    border-bottom: 1px solid var(--border);
+    position: relative;
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .figure-zone svg {
+    width: 76px;
+    height: 76px;
+    display: none;
+  }
+
+  .figure-zone svg.active {
+    display: block;
+  }
+
+  .figure-hint {
+    position: absolute;
+    bottom: 4px;
+    right: 12px;
+    font-size: 10px;
+    color: #C99A6E;
+    letter-spacing: 0.02em;
+  }
+
+  @keyframes wave {
+    0%, 100% { transform: rotate(0deg); }
+    50% { transform: rotate(18deg); }
+  }
+
+  .arm-wave {
+    transform-origin: 85% 35%;
+    animation: wave 1.6s ease-in-out infinite;
+  }
+
+  .header {
+    padding: 14px 20px 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .header .name {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--ink);
+    letter-spacing: 0.01em;
+  }
+
+  .status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--accent);
+    transition: background 0.2s;
+  }
+
+  .status-dot.paused {
+    background: #C7CBD1;
+  }
+
+  .countdown-zone {
+    padding: 28px 20px 20px;
+    text-align: center;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .countdown-label {
+    font-size: 12px;
+    color: var(--muted);
+    margin-bottom: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+
+  .countdown-number {
+    font-size: 44px;
+    font-weight: 600;
+    color: var(--ink);
+    line-height: 1;
+    letter-spacing: -0.02em;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .countdown-sub {
+    font-size: 13px;
+    color: var(--muted);
+    margin-top: 6px;
+  }
+
+  .section {
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .section-label {
+    font-size: 12px;
+    color: var(--muted);
+    margin-bottom: 10px;
+    font-weight: 500;
+  }
+
+  .interval-picker {
+    display: flex;
+    background: #ECEDEF;
+    border-radius: 8px;
+    padding: 3px;
+    gap: 2px;
+  }
+
+  .interval-picker button {
+    flex: 1;
+    border: none;
+    background: transparent;
+    padding: 7px 0;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--muted);
+    border-radius: 6px;
+    cursor: pointer;
+    font-family: inherit;
+  }
+
+  .interval-picker button.active {
+    background: white;
+    color: var(--ink);
+    box-shadow: 0 1px 2px rgba(0,0,0,0.08);
+  }
+
+  .custom-interval {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 10px;
+  }
+
+  .custom-interval input {
+    width: 64px;
+    padding: 6px 8px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-size: 13px;
+    font-family: inherit;
+    color: var(--ink);
+  }
+
+  .custom-interval label {
+    font-size: 12px;
+    color: var(--muted);
+  }
+
+  .custom-interval button {
+    margin-left: auto;
+    border: 1px solid var(--border);
+    background: white;
+    color: var(--ink);
+    font-size: 12px;
+    font-weight: 500;
+    padding: 6px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-family: inherit;
+  }
+
+  .stats {
+    padding: 14px 20px;
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .stat {
+    text-align: left;
+  }
+
+  .stat-value {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--ink);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .stat-label {
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 2px;
+  }
+
+  .action-zone {
+    padding: 16px 20px 20px;
+  }
+
+  .btn-primary {
+    width: 100%;
+    border: none;
+    background: var(--ink);
+    color: white;
+    padding: 11px 0;
+    font-size: 14px;
+    font-weight: 600;
+    border-radius: 8px;
+    cursor: pointer;
+    font-family: inherit;
+  }
+
+  .btn-primary.paused {
+    background: var(--bg);
+    color: var(--ink);
+    border: 1px solid var(--border);
+  }
+</style>
+</head>
+<body>
+
+<div class="figure-zone" id="figureZone">
+  <svg class="active" data-figure="kille" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="48" cy="28" r="14" fill="#FFD8B0"/>
+    <path d="M34 24 Q34 12 48 12 Q62 12 62 24 Q62 18 48 18 Q34 18 34 24 Z" fill="#3A2E2A"/>
+    <path d="M30 90 L33 56 Q33 48 48 48 Q63 48 63 56 L66 90 Z" fill="#3A6FF5"/>
+    <path d="M33 58 Q26 64 25 76" stroke="#3A6FF5" stroke-width="9" stroke-linecap="round"/>
+    <circle cx="25" cy="78" r="5.5" fill="#FFD8B0"/>
+    <g class="arm-wave">
+      <path d="M62 58 Q72 50 74 36" stroke="#3A6FF5" stroke-width="9" stroke-linecap="round"/>
+      <circle cx="74" cy="34" r="5.5" fill="#FFD8B0"/>
+    </g>
+    <circle cx="43" cy="27" r="1.6" fill="#3A2E2A"/>
+    <circle cx="53" cy="27" r="1.6" fill="#3A2E2A"/>
+    <path d="M43 33 Q48 36 53 33" stroke="#3A2E2A" stroke-width="1.6" stroke-linecap="round" fill="none"/>
+  </svg>
+
+  <svg data-figure="tjej" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="48" cy="28" r="14" fill="#FFD8B0"/>
+    <path d="M32 22 Q32 11 48 11 Q64 11 64 22 L65 46 Q60 38 60 30 Q60 22 48 22 Q36 22 36 30 Q36 38 31 46 Z" fill="#7A4A2E"/>
+    <path d="M30 90 L33 56 Q33 48 48 48 Q63 48 63 56 L66 90 Z" fill="#E8568C"/>
+    <path d="M33 58 Q26 64 25 76" stroke="#E8568C" stroke-width="9" stroke-linecap="round"/>
+    <circle cx="25" cy="78" r="5.5" fill="#FFD8B0"/>
+    <g class="arm-wave">
+      <path d="M62 58 Q72 50 74 36" stroke="#E8568C" stroke-width="9" stroke-linecap="round"/>
+      <circle cx="74" cy="34" r="5.5" fill="#FFD8B0"/>
+    </g>
+    <circle cx="43" cy="27" r="1.6" fill="#3A2E2A"/>
+    <circle cx="53" cy="27" r="1.6" fill="#3A2E2A"/>
+    <path d="M43 33 Q48 36 53 33" stroke="#3A2E2A" stroke-width="1.6" stroke-linecap="round" fill="none"/>
+  </svg>
+
+  <svg data-figure="ickebinar" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="48" cy="28" r="14" fill="#FFD8B0"/>
+    <path d="M33 23 Q33 12 48 12 Q63 12 63 23 Q63 17 48 16 Q41 16 38 26 Q36 21 33 23 Z" fill="#5B4636"/>
+    <path d="M30 90 L33 56 Q33 48 48 48 Q63 48 63 56 L66 90 Z" fill="#2EBFA5"/>
+    <path d="M33 58 Q26 64 25 76" stroke="#2EBFA5" stroke-width="9" stroke-linecap="round"/>
+    <circle cx="25" cy="78" r="5.5" fill="#FFD8B0"/>
+    <g class="arm-wave">
+      <path d="M62 58 Q72 50 74 36" stroke="#2EBFA5" stroke-width="9" stroke-linecap="round"/>
+      <circle cx="74" cy="34" r="5.5" fill="#FFD8B0"/>
+    </g>
+    <circle cx="43" cy="27" r="1.6" fill="#3A2E2A"/>
+    <circle cx="53" cy="27" r="1.6" fill="#3A2E2A"/>
+    <path d="M43 33 Q48 36 53 33" stroke="#3A2E2A" stroke-width="1.6" stroke-linecap="round" fill="none"/>
+  </svg>
+
+  <span class="figure-hint">tryck för att byta</span>
+</div>
+
+<div class="header">
+  <span class="name">Resningspåminnelse</span>
+  <span class="status-dot" id="statusDot"></span>
+</div>
+
+<div class="countdown-zone">
+  <div class="countdown-label">Nästa påminnelse om</div>
+  <div class="countdown-number" id="countdownNumber">--:--</div>
+  <div class="countdown-sub" id="countdownSub"></div>
+</div>
+
+<div class="section">
+  <div class="section-label">Intervall</div>
+  <div class="interval-picker" id="intervalPicker">
+    <button data-min="15">15 min</button>
+    <button data-min="30">30 min</button>
+    <button data-min="45">45 min</button>
+    <button data-min="60">60 min</button>
+  </div>
+  <div class="custom-interval">
+    <label for="customMin">Eget:</label>
+    <input type="number" id="customMin" min="1" max="480" placeholder="t.ex. 90">
+    <button id="customApply">Använd</button>
+  </div>
+</div>
+
+<div class="stats">
+  <div class="stat">
+    <div class="stat-value" id="statCount">0</div>
+    <div class="stat-label">Påminnelser idag</div>
+  </div>
+  <div class="stat">
+    <div class="stat-value" id="statInterval">30 min</div>
+    <div class="stat-label">Aktuellt intervall</div>
+  </div>
+</div>
+
+<div class="action-zone">
+  <button class="btn-primary" id="pauseBtn">Pausa</button>
+</div>
+
+<script src="popup.js"></script>
+</body>
+</html>
